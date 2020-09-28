@@ -1,51 +1,50 @@
-import React, { Component } from "react"
+import React, { Component, useState } from "react"
 import { Tabs, Tab } from 'react-bootstrap';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 
 
-export default class Builder extends Component {
+const Builder = (props) => {
+	const [key, setKey] = useState(1);
+	const [popoverOpen, setPopoverOpen] = useState(false);
 
-	constructor(props) {
-	  super(props);
-	  this.state = {
-		key: 1,
-		popoverOpen: false,
-	  };
+	const handleSelect = (value) => {
+		setKey(value);
 	}
 
-	handleSelect = (key) => {
-	  this.setState({key});
-	}
-
-	render () {
-		return (
+	return (
+		<Modal className="faio" size="lg" centered show={props.show} onHide={props.handleClose}>
+			<Modal.Header closeButton>
+				<Modal.Title>Build Optimizer</Modal.Title>
+			</Modal.Header>
+			<Modal.Body>
+		
 			<form className="builder-steps">
 				<div className="builder-tabs-container">		
 					<div className="builder-tabs">
 						<a 
-							className={`item builder-name ${this.state.key === 1 ? 'active' : ''}`} 
+							className={`item builder-name ${key === 1 ? 'active' : ''}`} 
 							type="button" 
-							onClick={()=>this.handleSelect(1)}
+							onClick={()=>handleSelect(1)}
 						>
 							<span>1.</span>Name
 						</a>
 						<a 
-							className={`item builder-positions ${this.state.key === 2 ? 'active' : ''}`} 
+							className={`item builder-positions ${key === 2 ? 'active' : ''}`} 
 							type="button" 
-							onClick={()=>this.handleSelect(2)}
+							onClick={()=>handleSelect(2)}
 						>
 							<span>2.</span>Positions
 						</a>
 						<a 
-							className={`item builder-rules ${this.state.key === 3 ? 'active' : ''}`} 
+							className={`item builder-rules ${key === 3 ? 'active' : ''}`} 
 							type="button" 
-							onClick={()=>this.handleSelect(3)}
+							onClick={()=>handleSelect(3)}
 						>
 							<span>3.</span>Rules
 						</a>
 					</div>
 					
-					<Tabs activeKey={this.state.key} onSelect={this.handleSelect}>
+					<Tabs activeKey={key} onSelect={handleSelect}>
 						<Tab eventKey={1}>
 							<div className="modal-optimizername">
 								<div className="ui level">
@@ -259,27 +258,32 @@ export default class Builder extends Component {
 					<button 
 						className="ui button builder-previous" 
 						type="button" 
-						onClick={() => this.setState({key: this.state.key - 1})} 
-						disabled={this.state.key === 1}
+						onClick={() => setKey(key-1)} 
+						disabled={key === 1}
 					>
 						Previous
 					</button>
 					<button 
 						className="ui button primary builder-next" 
 						type="button" 
-						onClick={() => this.setState({key: this.state.key + 1})} 
-						disabled={this.state.key === 3}
+						onClick={() => setKey(key+1)} 
+						disabled={key === 3}
 					>
 						Next
 					</button>
 					<button 
-						className={`ui button success builder-build ${this.state.key === 3 ? '' : 'hidden'}`} 
+						className={`ui button success builder-build ${key === 3 ? '' : 'hidden'}`} 
 						type="submit"
 					>
 						Build
 					</button>
 				</div>
 			</form>
-		)
-	}
+			
+		</Modal.Body>				
+	</Modal>
+	)
 }
+
+export default Builder;
+

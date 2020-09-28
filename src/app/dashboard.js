@@ -83,16 +83,15 @@ function Dashboard() {
 					</div>
 				</>
 			}
-			<Modal className="faio" size="lg" centered show={show} onHide={handleClose}>
-				<Modal.Header closeButton>
-					<Modal.Title>Build Optimizer</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-				
-					<Builder message={'Hello'}/>	
-					
-				</Modal.Body>				
-			</Modal>	
+
+			<Builder show={show} handleClose={handleClose} />
+
+			
+
+
+
+			
+
 		</div>
 	);
 }
