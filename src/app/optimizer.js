@@ -13,6 +13,7 @@ function Optimizer() {
 	const [player, setPlayer] = useState(true);
 	const [dropdown, setDropdown] = useState(false);
 	const [sub, setSub] = useState('all');
+	const dropdownContainer = React.useRef();
 
 	const miniSize = () => {
 		remote.getCurrentWindow().minimize();
@@ -21,7 +22,22 @@ function Optimizer() {
 	const close = () => {
 		remote.getCurrentWindow().close();
 	}
+
+	React.useEffect(() => {
+		window.addEventListener('click', onClickOutside);
+		return () => {
+			window.removeEventListener('click', onClickOutside);
+		}
+	});
 	
+	const onClickOutside = (e) => {
+		console.log(" container =>", dropdownContainer.current);
+		console.log(" e.target =>", e.target);
+		if(dropdown && !dropdownContainer.current.contains(e.target)) {
+			setDropdown(false);
+		}
+		
+	}
 	return ( 
 		<div className="optimizer ui window">
 		
@@ -120,34 +136,36 @@ function Optimizer() {
 													<a className={`item ${test === 'Test2' ? 'active' : ''}`} type="button" onClick={() => setTest('Test2')}>Test2</a>
 													<a className={`item ${test === 'Test3' ? 'active' : ''}`} type="button" onClick={() => setTest('Test3')}>Test3</a>
 													
-													<a className="sort-popover-trigger" type="button" onClick={() => setDropdown(!dropdown)}>
-														<i className="im im-angle-down" aria-hidden="true"></i>
-													</a>
-													
-													<div className="sort-popover dropdown-menu dropdown-menu-right" style={{display : `${dropdown ? 'block' : 'none'}`}}>
-														<div className="apply-exposure">
-															<label>
-																<OverlayTrigger
-																	placement="left" 
-																	overlay={
-																	<Popover id="popover-basic">
-																		<Popover.Content>
-																			Changes every players max exposure.
-																		</Popover.Content>
-																	</Popover>
-																}>
-																	<i className="im im-note-o i-info" aria-hidden="true"></i>
-																</OverlayTrigger>
-																Global Exposure 
-															</label>
-															<input type="tel" value="100" readOnly/>
+													<div ref={dropdownContainer}>
+														<a className="sort-popover-trigger" type="button" onClick={() => setDropdown(!dropdown)}>
+															<i className="im im-angle-down" aria-hidden="true"></i>
+														</a>
+														
+														<div className="sort-popover dropdown-menu dropdown-menu-right" style={{display : `${dropdown ? 'block' : 'none'}`}}>
+															<div className="apply-exposure">
+																<label>
+																	<OverlayTrigger
+																		placement="left" 
+																		overlay={
+																		<Popover id="popover-basic">
+																			<Popover.Content>
+																				Changes every players max exposure.
+																			</Popover.Content>
+																		</Popover>
+																	}>
+																		<i className="im im-note-o i-info" aria-hidden="true"></i>
+																	</OverlayTrigger>
+																	Global Exposure 
+																</label>
+																<input type="tel" value="100" readOnly/>
+															</div>
+															
+															<hr />
+															
+															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset FPTS</a>
+															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Exposures</a>
+															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Locks</a>
 														</div>
-														
-														<hr />
-														
-														<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset FPTS</a>
-														<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Exposures</a>
-														<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Locks</a>
 													</div>	
 												</div>
 											</div>
