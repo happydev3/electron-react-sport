@@ -1,0 +1,10 @@
+/* global css*/
+.i-info:hover {
+    cursor: pointer;
+}
+
+/* optimizer */
+
+.icimg-check-active {
+    border-bottom: 1px blue solid;
+}
