@@ -86,12 +86,6 @@ function Dashboard() {
 
 			<Builder show={show} handleClose={handleClose} />
 
-			
-
-
-
-			
-
 		</div>
 	);
 }

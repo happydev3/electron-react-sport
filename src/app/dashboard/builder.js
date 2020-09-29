@@ -5,7 +5,6 @@ import { Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 
 const Builder = (props) => {
 	const [key, setKey] = useState(1);
-	const [popoverOpen, setPopoverOpen] = useState(false);
 
 	const handleSelect = (value) => {
 		setKey(value);
