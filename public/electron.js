@@ -1,8 +1,13 @@
-require('electron-reload')(__dirname,{ignored: /data|[\/\\]\./});
+require('electron-reload')(__dirname, {
+    electron: require('${__dirname}/../../node_modules/electron')
+})
 
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow } = require('electron');
+// const sqlite3 = require('sqlite3');
 const path = require("path");
 const isDev = require("electron-is-dev");
+
+require('../src/controls/main');
 
 let mainWindow;
 

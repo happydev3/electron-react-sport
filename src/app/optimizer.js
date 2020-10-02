@@ -1,28 +1,37 @@
-import React, { useState } from 'react';
-import { Modal, Tabs, Tab, Dropdown, DropdownButton } from 'react-bootstrap';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
-const { remote } = window.require('electron');
+import Preloader from './shared/Preloader';
+import TopBar from './shared/TopBar';
+import Settings from './optimizer/Settings';
+import PlayerData from './optimizer/PlayerData';
+import Projections from './optimizer/Projections';
 
 
 function Optimizer() {
-	const [show, setShow] = useState(false);
-	const [projection, setProjection] = useState(false);
-	const [item, setItem] = useState('all');
-	const [test, setTest] = useState('Test1')
-	const [player, setPlayer] = useState(true);
-	const [dropdown, setDropdown] = useState(false);
-	const [sub, setSub] = useState('all');
-	const dropdownContainer = React.useRef();
-
-	const miniSize = () => {
-		remote.getCurrentWindow().minimize();
-	}
-
-	const close = () => {
-		remote.getCurrentWindow().close();
-	}
-
+	const [loading, setLoading] = useState(true);
+	const [optimizerTabs, setOptimizerTabs] = useState(true);
+	const [positionSort, setPositionSort] = useState('all');
+	const [playerSort, setPlayerSort] = useState('MyPool')
+	const [playerSortDropdown, setPlayerSortDropdown] = useState(false);
+	const playerSortDropdownContainer = React.useRef();
+	
+	const [settings, setSettings] = useState(false);
+	const handleCloseSettings = () => setSettings(false);
+	const handleShowSettings = () => setSettings(true);	
+	const [playerdata, setPlayerData] = useState(false);
+	const handleClosePlayerData = () => setPlayerData(false);
+	const handleShowPlayerData = () => setPlayerData(true);	
+	const [projections, setProjections] = useState(false);
+	const handleCloseProjections = () => setProjections(false);
+	const handleShowProjections = () => setProjections(true);
+	
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setLoading(false);
+		}, 400);
+		return () => clearTimeout(timer);
+	}, []);
+	
 	React.useEffect(() => {
 		window.addEventListener('click', onClickOutside);
 		return () => {
@@ -31,414 +40,171 @@ function Optimizer() {
 	});
 	
 	const onClickOutside = (e) => {
-		console.log(" container =>", dropdownContainer.current);
+		console.log(" container =>", playerSortDropdownContainer.current);
 		console.log(" e.target =>", e.target);
-		if(dropdown && !dropdownContainer.current.contains(e.target)) {
-			setDropdown(false);
+		if(playerSortDropdown && !playerSortDropdownContainer.current.contains(e.target)) {
+			setPlayerSortDropdown(false);
 		}
 		
-	}
+	}		
 	return ( 
 		<div className="optimizer ui window">
-		
-			<div className="topbar ui menu">
-				<Link to="/" className="logo-topbar item"><span className="logo-main-icon"></span> Sports Optimizer</Link>			
-								
-				<div className="right">			
-					<a className="item" type="button" onClick={miniSize}><i className="im im-minimize" aria-hidden="true"></i></a>
-					<a className="item maximized disabled" type="button"><i className="im im-maximize" aria-hidden="true"></i></a>
-					<a className="item" type="button" onClick={close}><i className="im im-x-mark" aria-hidden="true"></i></a>
-				</div>
-			</div>
+			{
+				loading
+				?
+				<Preloader />
+				:
+				<>			
+					<TopBar />
 
-			<div className="bottombar">
-				<div className="ui menu secondary">
-					<div className="item"><span className="optimizer-name">Optimizer Name</span></div>
-					
-					<div className="item item-spacer"></div>
-					
-					<div className="item item-grouped list-group">
-						<a className={`item playerstab ${player ? 'active' : ''}`} type="button" onClick={() => setPlayer(true)}>
-							<i className="icimg icimg-playerpool" aria-hidden="true"></i>
-							<span>Players</span>
-						</a>						
-						<a className={`item lineupstab ${!player ? 'active' : ''}`} type="button" onClick={() => setPlayer(false)}>
-							<i className="icimg icimg-lineups" aria-hidden="true"></i>
-							<span>Lineups</span>
-						</a>	
+					<div className="bottombar ui level">
+						<div className="item"><span className="optimizer-name">Optimizer Name</span></div>
+						
+						<div className="item item-spacer"></div>
+						
+						<div className="item item-grouped list-group">
+							<a className={`item playerstab ${optimizerTabs ? 'active' : ''}`} type="button" onClick={() => setOptimizerTabs(true)}>
+								<i className="icimg icimg-playerpool" aria-hidden="true"></i> 
+								<span>Players</span>
+							</a>						
+							<a className={`item lineupstab ${!optimizerTabs ? 'active' : ''}`} type="button" onClick={() => setOptimizerTabs(false)}>
+								<i className="icimg icimg-lineups" aria-hidden="true"></i> 
+								<span>Lineups</span>
+							</a>	
+						</div>
+						
+						<div className="item item-spacer"></div>
+						{
+							optimizerTabs
+							?
+							<div className="item item-grouped">
+								<a className="item" type="button" onClick={handleShowSettings}><i className="icimg icimg-settings" aria-hidden="true"></i> Settings</a>
+								<a className="item" type="button" onClick={handleShowProjections}><i className="icimg icimg-upload" aria-hidden="true"></i> Projections</a>
+								<a className="item" type="button" onClick={handleShowPlayerData}><i className="icimg icimg-upload" aria-hidden="true"></i> Player Data</a>
+							</div>
+							:
+							<div className="item item-grouped">
+								<a className="item" type="button"><i className="icimg icimg-check" aria-hidden="true"></i> <span>All</span></a>
+								<a className="item" type="button"><i className="icimg icimg-check" aria-hidden="true"></i> <span>None</span></a>						
+								<a className="item" type="button"><i className="icimg icimg-export" aria-hidden="true"></i> <span>Export</span></a>
+							</div>
+						}			
 					</div>
 					
-					<div className="item item-spacer"></div>
-					{
-						player
-						?
-						<div className="item item-grouped">
-							<a className="item" type="button" onClick={() => setShow(true)}>
-								<i className="icimg icimg-settings" aria-hidden="true"></i> 
-								Settings
-							</a>
-							<a className="item" type="button" onClick={() => setProjection(true)}>
-								<i className="icimg icimg-upload" aria-hidden="true"></i> 
-								Projections
-							</a>
-						</div>
-						:
-						<div className="item item-grouped">
-							<a className={`item select-all ${sub === 'all' ? 'active' : ''}`} type="button" onClick={() => setSub('all')}>
-								<i className="icimg icimg-check" aria-hidden="true"></i>
-								<span>All</span>
-							</a>
-							<a className={`item select-none ${sub === 'none' ? 'active' : ''}`} type="button" onClick={() => setSub('none')}>
-								<i className="icimg icimg-check" aria-hidden="true"></i>
-								<span>None</span>
-							</a>						
-							<a className={`item select-export ${sub === 'export' ? 'active' : ''}`} type="button" onClick={() => setSub('export')}>
-								<i className="icimg icimg-export" aria-hidden="true"></i>
-								<span>Export<span className="tag">0</span></span>
-							</a>
-						</div>
-					}
-				</div>			
-			</div>
-			
-			<div className="window-content">
-				<div className="pane tab-content">
-					{
-						player
-						?
-						<section id="playerstab" className="pp-content content tab-pane active">
-							<div className="playerpool-pane-group">
-								<div className="playerpool-pane">		
-								
-									<div className="playerpool-sorts">
-										<div className="ui menu secondary">	
-											<div className="item">
-												<div className="search ui input">
-													<input type="text" placeholder="Test..." readOnly/>
-													<i className="search-icon im im-magnifier"></i>
-												</div>
-											</div>	
-											
-											<div className="item item-grouped">
-												<a className={`item ${item === 'all' ? 'active' : ''}`} type="button" onClick={() => setItem('all')}>All</a>
-												<a className={`item ${item === 'p' ? 'active' : ''}`} type="button" onClick={() => setItem('p')}>P</a>
-												<a className={`item ${item === 'c' ? 'active' : ''}`} type="button" onClick={() => setItem('c')}>C</a>
-												<a className={`item ${item === '1b' ? 'active' : ''}`} type="button" onClick={() => setItem('1b')}>1B</a>
-												<a className={`item ${item === '2b' ? 'active' : ''}`} type="button" onClick={() => setItem('2b')}>2B</a>	
-												<a className={`item ${item === '3b' ? 'active' : ''}`} type="button" onClick={() => setItem('3b')}>3B</a>	
-												<a className={`item ${item === 'ss' ? 'active' : ''}`} type="button" onClick={() => setItem('ss')}>SS</a>	
-												<a className={`item ${item === 'of' ? 'active' : ''}`} type="button" onClick={() => setItem('of')}>OF</a>
-											</div>
-											
-											<div className="right">
+					<div className="window-content">
+						<div className="pane">
+							{
+								optimizerTabs
+								?
+								<section className="pp-content content">
+									<div className="playerpool-pane-group">
+										<div className="playerpool-pane">		
+										
+											<div className="playerpool-sorts ui level margin">
+												<div className="item">
+													<div className="search ui input">
+														<input type="text" placeholder="Search players..." readOnly/>
+														<i className="search-icon im im-magnifier"></i>
+													</div>
+												</div>	
+												
 												<div className="item item-grouped">
-													<a className={`item ${test === 'Test1' ? 'active' : ''}`} type="button" onClick={() => setTest('Test1')}>Test1</a>
-													<a className={`item ${test === 'Test2' ? 'active' : ''}`} type="button" onClick={() => setTest('Test2')}>Test2</a>
-													<a className={`item ${test === 'Test3' ? 'active' : ''}`} type="button" onClick={() => setTest('Test3')}>Test3</a>
-													
-													<div ref={dropdownContainer}>
-														<a className="sort-popover-trigger" type="button" onClick={() => setDropdown(!dropdown)}>
-															<i className="im im-angle-down" aria-hidden="true"></i>
+													<a className={`item ${positionSort === 'all' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('all')}>All</a>
+													<a className={`item ${positionSort === 'p' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('p')}>P</a>
+													<a className={`item ${positionSort === 'c' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('c')}>C</a>
+													<a className={`item ${positionSort === '1b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('1b')}>1B</a>
+													<a className={`item ${positionSort === '2b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('2b')}>2B</a>	
+													<a className={`item ${positionSort === '3b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('3b')}>3B</a>	
+													<a className={`item ${positionSort === 'ss' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('ss')}>SS</a>	
+													<a className={`item ${positionSort === 'of' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('of')}>OF</a>
+												</div>
+												
+												<div className="right">
+													<div className="item item-grouped">
+														<a className={`item ${playerSort === 'MyPool' ? 'active' : ''}`} type="button" onClick={() => setPlayerSort('MyPool')}>
+															My Pool
+															<span className="tag total_my_pool">0</span>
+														</a>
+														<a className={`item ${playerSort === 'Locked' ? 'active' : ''}`} type="button" onClick={() => setPlayerSort('Locked')}>
+															Locked
+															<span className="tag total_locked"><span className="locked-player-count">0</span> | <span className="locked-salary-total">0</span></span>
+														</a>
+														<a className={`item ${playerSort === 'Removed' ? 'active' : ''}`} type="button" onClick={() => setPlayerSort('Removed')}>
+															Removed
+															<span className="tag total_removed">0</span>
 														</a>
 														
-														<div className="sort-popover dropdown-menu dropdown-menu-right" style={{display : `${dropdown ? 'block' : 'none'}`}}>
-															<div className="apply-exposure">
-																<label>
-																	<OverlayTrigger
-																		placement="left" 
-																		overlay={
-																		<Popover id="popover-basic">
-																			<Popover.Content>
-																				Changes every players max exposure.
-																			</Popover.Content>
-																		</Popover>
-																	}>
-																		<i className="im im-note-o i-info" aria-hidden="true"></i>
-																	</OverlayTrigger>
-																	Global Exposure 
-																</label>
-																<input type="tel" value="100" readOnly/>
+														<div ref={playerSortDropdownContainer}>
+															<a className="item sort-popover-trigger" type="button" onClick={() => setPlayerSortDropdown(!playerSortDropdown)}>
+																<i className="im im-angle-down" aria-hidden="true"></i>
+															</a>
+															
+															<div className="sort-popover dropdown-menu dropdown-menu-right" style={{display : `${playerSortDropdown ? 'block' : 'none'}`}}>
+																<div className="apply-exposure">
+																	<label>
+																		<OverlayTrigger
+																			placement="left" 
+																			overlay={
+																			<Popover id="popover-basic">
+																				<Popover.Content>
+																					Changes every players max exposure.
+																				</Popover.Content>
+																			</Popover>
+																		}>
+																			<i className="im im-note-o i-info" aria-hidden="true"></i>
+																		</OverlayTrigger>
+																		Global Exposure 
+																	</label>
+																	<input type="tel" value="100" readOnly/>
+																</div>
+																
+																<hr />
+																
+																<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset FPTS</a>
+																<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Exposures</a>
+																<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Locks</a>
 															</div>
-															
-															<hr />
-															
-															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset FPTS</a>
-															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Exposures</a>
-															<a className="item" type="button"><i className="im im-reset" aria-hidden="true"></i> Reset Locks</a>
-														</div>
-													</div>	
+														</div>		
+													</div>
+												</div>
+											</div>	
+
+											<div className="playerpool-grid">
+
+												<div className="playerpool-nodata-overlay active">
+													<div className="content">
+														<button className="ui success button" type="button" onClick={handleShowPlayerData}><i className="im im-cloud-upload" aria-hidden="true"></i> Player Data</button>
+													</div>
 												</div>
 											</div>
-										</div>	
-									</div>	
+											
+											<div className="playerpool-calc ui level margin">
+														
+											</div>							
+										</div>
+									</div>
+								</section>
+								:
+								<section className="lin-content content">
+									<div className="lineups-pane-group">						
+										<div className="lineups-pane-sm">
+										
+										</div>
+										
+										<div className="lineups-pane">
 
-									<div className="playerpool-grid">
-
-									</div>
-									
-									<div className="playerpool-calc">
-												
-									</div>							
-								</div>
-							</div>
-						</section>
-						:
-						<section id="lineupstab" className="lin-content content tab-pane">
-							<div className="lineups-pane-group">						
-								<div className="lineups-pane-sm">
-								
-								</div>
-								
-								<div className="lineups-pane">
-
-								</div>
-							</div>					
-						</section>
-					}
-				</div>
-			</div>
-			
-			<Modal className="faio" size="lg" centered show={show} onHide={() => setShow(false)}>
-				<Modal.Header closeButton>
-					<Modal.Title>Settings</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<div className="container-fluid">
-						<div className="row">	
-							<div className="col-12 col-lg-6">
-								<div className="modal-positions">
-									<div className="ui level">
-										<h5>Positions &nbsp;
-											<OverlayTrigger
-												placement="right" 
-												overlay={
-												<Popover id="popover-basic">
-													<Popover.Content>
-														Positions required for a single lineup
-													</Popover.Content>
-												</Popover>
-											}>
-												<i className="im im-note-o i-info" aria-hidden="true"></i>
-											</OverlayTrigger>
-										</h5>
-									</div>
-									
-									<table className="ui tbl grey positions-table">
-										<thead>
-											<tr>
-												<th>Position</th>
-												<th className="right">Delete</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td>
-													<input type="tel" value="" placeholder="Enter position/s..." readOnly/>
-												</td>
-												<td className="right"><i className="ic-delete-1" aria-hidden="true"></i></td>
-											</tr>
-										</tbody>
-									</table>
-									
-									<div className="ui level add-position">
-										<button className="ui button primary i-left" type="button"><i className="im im-plus-circle" aria-hidden="true"></i> Add Position</button>
-									</div>
-								</div>											
-							</div>
-						
-							<div className="col-12 col-lg-6">	
-								<div className="modal-rules">
-									<div className="ui level">
-										<h5>Rules &nbsp;
-											<OverlayTrigger
-												placement="right" 
-												overlay={
-												<Popover id="popover-basic">
-													<Popover.Content>
-														Rules required for a single lineup
-													</Popover.Content>
-												</Popover>
-											}>
-												<i className="im im-note-o i-info" aria-hidden="true"></i>
-											</OverlayTrigger>
-										</h5>
-									</div>
-									
-									<table className="ui tbl grey rules-table">
-										<thead>
-											<tr>
-												<th>Rule</th>
-												<th className="right">Set</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td>Minimum Salary Cap &nbsp;
-													<OverlayTrigger
-														placement="right" 
-														overlay={
-														<Popover id="popover-basic">
-															<Popover.Content>
-																Minimum salary allowed for a single lineup
-															</Popover.Content>
-														</Popover>
-													}>
-														<i className="im im-note-o i-info" aria-hidden="true"></i>
-													</OverlayTrigger>
-												</td>
-												<td className="right">
-													<label>0 if not changed</label>
-													<input className="rules-minsalary" type="tel" value="0" readOnly/>
-												</td>
-											</tr>
-											
-											<tr>
-												<td>Maximum Salary Cap &nbsp;
-													<OverlayTrigger
-														placement="right" 
-														overlay={
-														<Popover id="popover-basic">
-															<Popover.Content>
-																Maximum salary allowed for a single lineup
-															</Popover.Content>
-														</Popover>
-													}>
-														<i className="im im-note-o i-info" aria-hidden="true"></i>
-													</OverlayTrigger>
-												</td>
-												<td className="right">
-													<input className="rules-maxsalary" type="tel" value="0" readOnly/>
-												</td>
-											</tr>
-											
-											<tr>
-												<td>Max. Players From 1 Team &nbsp;
-													<OverlayTrigger
-														placement="right" 
-														overlay={
-														<Popover id="popover-basic">
-															<Popover.Content>
-																Maximum allowed players from a single team for a single lineup
-															</Popover.Content>
-														</Popover>
-													}>
-														<i className="im im-note-o i-info" aria-hidden="true"></i>
-													</OverlayTrigger>
-												</td>
-												<td className="right">
-													<label>0 if not needed</label>
-													<input className="rules-maxplayers" type="tel" value="0" readOnly/>
-												</td>
-											</tr>
-											
-											<tr>
-												<td>Min. different teams &nbsp;
-													<OverlayTrigger
-														placement="right" 
-														overlay={
-														<Popover id="popover-basic">
-															<Popover.Content>
-																Single lineup must have players from set minimum number of different teams
-															</Popover.Content>
-														</Popover>
-													}>
-														<i className="im im-note-o i-info" aria-hidden="true"></i>
-													</OverlayTrigger>
-												</td>
-												<td className="right">
-													<label>0 if not needed</label>
-													<input className="rules-minteams" type="tel" value="0" readOnly/>
-												</td>
-											</tr>
-											
-											<tr>
-												<td>No opponent vs &nbsp;
-													<OverlayTrigger
-														placement="right" 
-														overlay={
-														<Popover id="popover-basic">
-															<Popover.Content>
-																No opponent vs. selected position will be added to lineup
-															</Popover.Content>
-														</Popover>
-													}>
-														<i className="im im-note-o i-info" aria-hidden="true"></i>
-													</OverlayTrigger>
-												</td>
-												<td className="right">
-													<label>none if not needed</label>
-													<select className="rules-noopponent">
-														<option value="">None</option>
-													</select>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>									
-							</div>							
+										</div>
+									</div>					
+								</section>
+							}
 						</div>
-						
-						<div className="row">					
-							<div className="col-12">						
-								<div className="modal-optimizername">
-									<div className="ui level">
-										<h5>Name &nbsp;
-											<OverlayTrigger
-												placement="right" 
-												overlay={
-												<Popover id="popover-basic">
-													<Popover.Content>
-														This is your optimizer name
-													</Popover.Content>
-												</Popover>
-											}>
-												<i className="im im-note-o i-info" aria-hidden="true"></i>
-											</OverlayTrigger>
-										</h5>
-									</div>
-									
-									<table className="ui tbl grey optimizername-table">
-										<thead>
-											<tr>
-												<th>Optimizer Name</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td>
-													<input className="name-optimizername" type="text" value="" placeholder="Enter Name..." readOnly/>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>								
-							</div>							
-						</div>
-						
-						<div className="row">
-							<div className="col-12">
-								<button className="ui button success i-left" type="button"><i className="im im-floppy-disk" aria-hidden="true"></i> Save Settings</button>
-							</div>
-						</div>
-					</div>								
-				</Modal.Body>
-			</Modal>
-			
-			<Modal className="faio" size="lg" show={projection} onHide={() => setProjection(false)}>
-				<Modal.Header closeButton>
-					<Modal.Title>Projections</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<div className="container-fluid">
-
 					</div>
-					
-					<div className="level-box">
-
-					</div>
-				</Modal.Body>
-			</Modal>
+				</>
+			}
 			
+			<Settings show={settings} handleClose={handleCloseSettings} />
+			<PlayerData show={playerdata} handleClose={handleClosePlayerData} />
+			<Projections show={projections} handleClose={handleCloseProjections} />		
 		</div>
 	);
 }

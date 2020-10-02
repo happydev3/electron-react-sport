@@ -1,17 +1,15 @@
-import React, { Component, useState } from "react"
-import { Tabs, Tab } from 'react-bootstrap';
-import { Popover, OverlayTrigger, Modal } from 'react-bootstrap';
+import React, { useState } from "react"
+import { Tabs, Tab, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 
 
 const Builder = (props) => {
 	const [key, setKey] = useState(1);
-
 	const handleSelect = (value) => {
 		setKey(value);
 	}
 
 	return (
-		<Modal className="faio" size="lg" centered show={props.show} onHide={props.handleClose}>
+		<Modal size="lg" centered show={props.show} onHide={props.handleClose}>
 			<Modal.Header closeButton>
 				<Modal.Title>Build Optimizer</Modal.Title>
 			</Modal.Header>
@@ -62,10 +60,10 @@ const Builder = (props) => {
 									</h5>
 								</div>
 								
-								<table className="ui tbl grey optimizername-table">
+								<table className="ui tbl optimizername-table">
 									<thead>
 										<tr>
-											<th>Create Optimizer Name : <span>Required</span></th>
+											<th>Create Optimizer Name <span>Required</span></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -97,10 +95,10 @@ const Builder = (props) => {
 									</h5>
 								</div>
 								
-								<table className="ui tbl grey positions-table">
+								<table className="ui tbl positions-table">
 									<thead>
 										<tr>
-											<th>Position : <span>At least 1 position required</span></th>
+											<th>Position <span>At least 1 position required</span></th>
 											<th className="right">Delete</th>
 										</tr>
 									</thead>
@@ -138,7 +136,7 @@ const Builder = (props) => {
 									</h5>
 								</div>
 								
-								<table className="ui tbl grey rules-table">
+								<table className="ui tbl rules-table">
 									<thead>
 										<tr>
 											<th>Rule</th>
@@ -167,7 +165,7 @@ const Builder = (props) => {
 										</tr>
 										
 										<tr>
-											<td>Minimum Salary Cap &nbsp;
+											<td>Maximum Salary Cap &nbsp;
 												<OverlayTrigger
 													placement="right" 
 													overlay={
@@ -181,6 +179,7 @@ const Builder = (props) => {
 												</OverlayTrigger>
 											</td>
 											<td className="right">
+												<span>Required</span>
 												<input className="rules-maxsalary" type="tel" value="0" readOnly/>
 											</td>
 										</tr>
