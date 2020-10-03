@@ -79,7 +79,6 @@ const Builder = (props) => {
 			}
 			ipcRenderer.send('insertOptimizes', sql);
 			ipcRenderer.on('responseInsertOptimizes', (event, arg) => {
-				console.log('_____arg_______', arg);
 				if(arg === 'success') {
 					props.handleClose(false);
 				}
@@ -381,9 +380,9 @@ const Builder = (props) => {
 												<select className="rules-noopponent" onChange={handleNoOpponent} value={noOpponent}>
 													<option value="">None</option>
 													{
-														opponents.map((opponent) => {
+														opponents.map((opponent, index) => {
 															return (
-																<option value={opponent}>{opponent}</option>
+																<option key={index} value={opponent}>{opponent}</option>
 															)
 														})
 													}

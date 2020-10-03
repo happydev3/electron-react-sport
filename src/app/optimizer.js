@@ -31,10 +31,8 @@ const Optimizer = (props) => {
 	const handleShowProjections = () => setProjections(true);
 
 	const getOptimize = (id) => {
-		console.log('id', id);
 		ipcRenderer.send('getOptimizes', id);
 		ipcRenderer.on('responseGetOptimizes', (event, arg) => {
-			console.log('IPC RENDER', arg);
 			setOptimize(arg[0]);
 		});
 	}

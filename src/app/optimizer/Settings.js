@@ -304,9 +304,9 @@ const Settings = (props) => {
 											<select className="rules-noopponent" onChange={handleNoOpponent} value={noOpponent}>
 												<option value="">None</option>
 												{
-													opponents.map((opponent) => {
+													opponents.map((opponent, index) => {
 														return (
-															<option value={opponent}>{opponent}</option>
+															<option key={index} value={opponent}>{opponent}</option>
 														)
 													})
 												}

@@ -30,8 +30,6 @@ ipcMain.on('getOptimizes', (event, arg) => {
 
 ipcMain.on('insertOptimizes', (event, arg) => {
     
-    console.log('____arg_____', arg);
-
     db('optimizers')
     .insert({
         name: arg.name,
@@ -52,8 +50,6 @@ ipcMain.on('insertOptimizes', (event, arg) => {
 })
 
 ipcMain.on('updateOptimizes', (event, arg) => {
-
-    console.log('______arg________', arg);
 
     db('optimizers')
     .where('id', arg.id)
@@ -77,7 +73,6 @@ ipcMain.on('updateOptimizes', (event, arg) => {
 
 
 ipcMain.on('deleteOptimize', (event, arg) => {
-    console.log('____argId______', arg);
     db('optimizers')
     .where('id', arg)
     .del()
