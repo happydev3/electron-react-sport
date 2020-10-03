@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
 import Preloader from './shared/Preloader';
 import TopBar from './shared/TopBar';
 import Settings from './optimizer/Settings';
 import PlayerData from './optimizer/PlayerData';
 import Projections from './optimizer/Projections';
 
+const { ipcRenderer } = window.require('electron');
 
-function Optimizer() {
+const Optimizer = (props) => {
+
 	const [loading, setLoading] = useState(true);
 	const [optimizerTabs, setOptimizerTabs] = useState(true);
 	const [positionSort, setPositionSort] = useState('all');
@@ -16,23 +19,46 @@ function Optimizer() {
 	const playerSortDropdownContainer = React.useRef();
 	
 	const [settings, setSettings] = useState(false);
+	const [playerdata, setPlayerData] = useState(false);
+	const [projections, setProjections] = useState(false);
+	const [optimize, setOptimize] = useState('');
+	const [positions, setPositions] = useState();
 	const handleCloseSettings = () => setSettings(false);
 	const handleShowSettings = () => setSettings(true);	
-	const [playerdata, setPlayerData] = useState(false);
 	const handleClosePlayerData = () => setPlayerData(false);
 	const handleShowPlayerData = () => setPlayerData(true);	
-	const [projections, setProjections] = useState(false);
 	const handleCloseProjections = () => setProjections(false);
 	const handleShowProjections = () => setProjections(true);
+
+	const getOptimize = (id) => {
+		console.log('id', id);
+		ipcRenderer.send('getOptimizes', id);
+		ipcRenderer.on('responseGetOptimizes', (event, arg) => {
+			console.log('IPC RENDER', arg);
+			setOptimize(arg[0]);
+		});
+	}
+
+	const getID = (pathname) => {
+		getOptimize(pathname.split('/').slice(-1)[0]);
+	}
 	
 	useEffect(() => {
+
 		const timer = setTimeout(() => {
 			setLoading(false);
 		}, 400);
-		return () => clearTimeout(timer);
+
+		getID(props.history.location.pathname);
+
+
+		return () => {
+			clearTimeout(timer);
+		}
+
 	}, []);
-	
-	React.useEffect(() => {
+
+	useEffect(() => {
 		window.addEventListener('click', onClickOutside);
 		return () => {
 			window.removeEventListener('click', onClickOutside);
@@ -40,13 +66,14 @@ function Optimizer() {
 	});
 	
 	const onClickOutside = (e) => {
-		console.log(" container =>", playerSortDropdownContainer.current);
-		console.log(" e.target =>", e.target);
 		if(playerSortDropdown && !playerSortDropdownContainer.current.contains(e.target)) {
 			setPlayerSortDropdown(false);
 		}
-		
 	}		
+    const callback = () => {
+		getID(props.history.location.pathname);
+	}
+
 	return ( 
 		<div className="optimizer ui window">
 			{
@@ -58,7 +85,7 @@ function Optimizer() {
 					<TopBar />
 
 					<div className="bottombar ui level">
-						<div className="item"><span className="optimizer-name">Optimizer Name</span></div>
+						<div className="item"><span className="optimizer-name">{optimize.name}</span></div>
 						
 						<div className="item item-spacer"></div>
 						
@@ -109,14 +136,13 @@ function Optimizer() {
 												</div>	
 												
 												<div className="item item-grouped">
-													<a className={`item ${positionSort === 'all' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('all')}>All</a>
-													<a className={`item ${positionSort === 'p' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('p')}>P</a>
-													<a className={`item ${positionSort === 'c' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('c')}>C</a>
-													<a className={`item ${positionSort === '1b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('1b')}>1B</a>
-													<a className={`item ${positionSort === '2b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('2b')}>2B</a>	
-													<a className={`item ${positionSort === '3b' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('3b')}>3B</a>	
-													<a className={`item ${positionSort === 'ss' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('ss')}>SS</a>	
-													<a className={`item ${positionSort === 'of' ? 'active' : ''}`} type="button" onClick={() => setPositionSort('of')}>OF</a>
+													{
+														optimize.positions && optimize.positions.split(',').map((position, index) => {
+															return (
+															<a key={index} className={`item ${positionSort === position ? 'active' : ''}`} type="button" onClick={() => setPositionSort(position)}>{position}</a>
+															)
+														})
+													}
 												</div>
 												
 												<div className="right">
@@ -202,11 +228,11 @@ function Optimizer() {
 				</>
 			}
 			
-			<Settings show={settings} handleClose={handleCloseSettings} />
+			<Settings show={settings} handleClose={handleCloseSettings} optimize={optimize} callback={callback}/>
 			<PlayerData show={playerdata} handleClose={handleClosePlayerData} />
 			<Projections show={projections} handleClose={handleCloseProjections} />		
 		</div>
 	);
 }
 
-export default Optimizer;
+export default withRouter(Optimizer);

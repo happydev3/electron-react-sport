@@ -13,15 +13,79 @@ const db = require('knex')({
 });
 
 ipcMain.on('getOptimizes', (event, arg) => {
-    console.log('____argument_______', arg);
 
-    let result = db.select().from('optimizers');
+    let result;
 
+    if( arg === 'all') {
+        result = db.select().from('optimizers');
+    } else {
+        result = db.select().from('optimizers').where('id', arg);
+    };
+    
     result.then((rows) => {
-        console.log('*******rows*********', rows);
         event.reply('responseGetOptimizes', rows);
     })
-    // console.log('result', result);
+   
+});
 
-    // ipcMain.send('responseGetOptimizes', result);
+ipcMain.on('insertOptimizes', (event, arg) => {
+    
+    console.log('____arg_____', arg);
+
+    db('optimizers')
+    .insert({
+        name: arg.name,
+        minSalary: arg.minSalary,
+        maxSalary: arg.maxSalary,
+        maxPlayers: arg.maxPlayers,
+        minTeams: arg.minTeams,
+        noOpponent: arg.noOpponent,
+        positions: arg.positions.toString()
+    })
+    .then((rows) => {
+       event.reply('responseInsertOptimizes', 'success')
+    })
+    .catch(e => {
+        console.error(e);
+        event.reply('responseInsertOptimizes', 'false')
+    });
+})
+
+ipcMain.on('updateOptimizes', (event, arg) => {
+
+    console.log('______arg________', arg);
+
+    db('optimizers')
+    .where('id', arg.id)
+    .update({
+        name: arg.name,
+        minSalary: arg.minSalary,
+        maxSalary: arg.maxSalary,
+        maxPlayers: arg.maxPlayers,
+        minTeams: arg.minTeams,
+        noOpponent: arg.noOpponent,
+        positions: arg.positions.toString()
+    })
+    .then((rows) => {
+       event.reply('responseUpdateOptimizes', 'success')
+    })
+    .catch(e => {
+        console.error(e);
+        event.reply('responseUpdateOptimizes', 'false')
+    });
+});
+
+
+ipcMain.on('deleteOptimize', (event, arg) => {
+    console.log('____argId______', arg);
+    db('optimizers')
+    .where('id', arg)
+    .del()
+    .then((rows) => {
+        event.reply('responseDeleteOptimize', 'success')
+     })
+     .catch(e => {
+         console.error(e);
+         event.reply('responseDeleteOptimize', 'false')
+     });
 });

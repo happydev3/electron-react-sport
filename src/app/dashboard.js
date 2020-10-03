@@ -1,27 +1,33 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import Preloader from './shared/Preloader';
 import TopBar from './shared/TopBar';
 import Builder from './dashboard/builder';
 
 const { ipcRenderer } = window.require('electron');
 
-function getOptimizes() {
-	console.log('Test');
-	ipcRenderer.send('getOptimizes', 'all');
-	ipcRenderer.on('responseGetOptimizes', (event, arg) => {
-		console.log('IPC RENDER', arg);
-	});
-}
-
-const Dashboard = () => {
+const Dashboard = (props) => {
 
 	const [loading, setLoading] = useState(true);
 	const [builder, setBuilder] = useState(false);
-	const [isExist, setIsExist] = useState(false);
+	const [optimizes, setOptimizes] = useState('');
 	const handleCloseBuilder = () => setBuilder(false);
 	const handleShowBuilder = () => setBuilder(true);
 
+	const getOptimizes = () => {
+		ipcRenderer.send('getOptimizes', 'all');
+		ipcRenderer.on('responseGetOptimizes', (event, arg) => {
+			setOptimizes(arg);
+		});
+	}
+
+	const deleteOptimize = (id) => {
+		console.log('IIIIIIDDDDDD', id);
+		ipcRenderer.send('deleteOptimize', id);
+		ipcRenderer.on('responseDeleteOptimize', (event, arg) => {
+			getOptimizes();
+		});
+	}
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -33,7 +39,7 @@ const Dashboard = () => {
 		return () => {
 			clearTimeout(timer);
 		}
-	});
+	}, []);
   
 	return ( 
 		<div className="dashboard ui window">
@@ -45,35 +51,41 @@ const Dashboard = () => {
 				<>	
 					<TopBar />
 					{
-						isExist
+						optimizes.length !== 0
 						?
 						<>					
-							
 							<div className="bottombar ui level">
 								<a className="item" variant="primary" onClick={handleShowBuilder}><i className="icimg icimg-playerpool" aria-hidden="true"></i> Build</a>				
 								<div className="item item-spacer"></div>
 								<a className="item" type="button"><i className="icimg icimg-delete" aria-hidden="true"></i> Delete</a>			
-							</div>	
-						
+							</div>
+							
 							<div className="window-content dash-window-content">
 								<div className="pane dash-pane">					
 									<div className="scrollable">
 										<ul className="dash-optimizerlist">
-											<li>
-												<div className="list-container">
-													<div className="list-logo-container"><span className="logo-main-icon"></span></div>
-													<div className="list-optimizer-name">Optimizer Name 1</div>
-													<div className="list-button-container">
-														<Link to="/optimizer" className="ui button secondary" type="button"><i className="im im-external-link" aria-hidden="true"></i>Open</Link>
-														<a className="ui button danger" type="button"><i className="im im-trash-can" aria-hidden="true"></i></a>
-													</div>
-												</div>
-											</li>
+										{
+											optimizes.map((optimize, index) => {
+												return (
+													<li key={index}>
+														<div className="list-container">
+															<div className="list-logo-container"><span className="logo-main-icon"></span></div>
+															<div className="list-optimizer-name">{optimize.name}</div>
+															<div className="list-button-container">
+																<Link to={`/optimizer/${optimize.id}`} className="ui button secondary" type="button"><i className="im im-external-link" aria-hidden="true"></i>Open</Link>
+																<a className="ui button danger" type="button" onClick={() => deleteOptimize(optimize.id)}>
+																	<i className="im im-trash-can" aria-hidden="true"></i>
+																</a>
+															</div>
+														</div>
+													</li>
+												)
+											})
+										}
 										</ul>
 									</div>			
 								</div>
 							</div>
-							
 							<div className="dash-nodata-overlay">
 								<div className="content">
 									<button className="ui success button" type="button" onClick={handleShowBuilder}><i className="im im-tools" aria-hidden="true"></i> Build Optimizer</button>
@@ -98,4 +110,4 @@ const Dashboard = () => {
 	);
 }
 
-export default Dashboard;
+export default withRouter(Dashboard);

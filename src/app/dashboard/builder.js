@@ -1,9 +1,93 @@
 import React, { useState } from "react"
 import { Tabs, Tab, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
+const { ipcRenderer } = window.require('electron');
 
+const noOpponents = ["A","B","C","D","E","F","G","H","Z"];
 
 const Builder = (props) => {
 	const [key, setKey] = useState(1);
+	const [id, setId] = useState('');
+	const [name, setName] = useState('');
+	const [positions, setPositions] = useState([]);
+	const [minSalary, setMinSalary] = useState('');
+	const [maxSalary, setMaxSalary] = useState('');
+	const [maxPlayers, setMaxPlayers] = useState('');
+	const [minTeams, setMinTeams] = useState('');
+	const [noOpponent, setNoOpponent] = useState(1);
+	const [opponents, setOpponents] = useState([]);
+
+	const handleName = (e) => {
+		setName(e.target.value);
+	}
+
+	const handleMinSalary = (e) => {
+		setMinSalary(e.target.value);
+	}
+
+	const handleMaxSalary = (e) => {
+		setMaxSalary(e.target.value);
+	}
+
+	const handleMaxPlayers = (e) => {
+		setMaxPlayers(e.target.value);
+	}
+
+	const handleMinTeams = (e) => {
+		setMinTeams(e.target.value);
+	}
+
+	const handleNoOpponent = (e) => {
+		setNoOpponent(e.target.value);
+	}
+
+	const pushNewPosition = () => {
+		const newArray = positions.concat(['']);
+		setPositions(newArray);
+	}
+
+	const handlePositions = (e, index) => {
+		e.persist();
+		let shadowPositions= [...positions];
+		let shadowOpponents = [...opponents];
+		e.target.value.split(',').map((item) => {
+			if(!shadowOpponents.includes(item) && item !== '') {
+				shadowOpponents.push(item);
+			}
+			setOpponents(shadowOpponents);
+		})
+		shadowPositions[index] = e.target.value;
+		setPositions(shadowPositions);
+	}
+
+	const deletePosition = (e, index) => {
+		let newArr = [...positions];
+		newArr.splice(index, 1);
+		setPositions(newArr);
+	}
+
+	const saveSetting = () => {
+		if(name !== '' && maxSalary !== '') {
+			let sql = {
+				id: id,
+				name: name,
+				minSalary: minSalary,
+				maxSalary: maxSalary,
+				maxPlayers: maxPlayers,
+				minTeams: minTeams,
+				noOpponent: noOpponent,
+				positions: positions
+			}
+			ipcRenderer.send('insertOptimizes', sql);
+			ipcRenderer.on('responseInsertOptimizes', (event, arg) => {
+				console.log('_____arg_______', arg);
+				if(arg === 'success') {
+					props.handleClose(false);
+				}
+			});
+		}
+	}
+
+
 	const handleSelect = (value) => {
 		setKey(value);
 	}
@@ -29,6 +113,7 @@ const Builder = (props) => {
 							className={`item builder-positions ${key === 2 ? 'active' : ''}`} 
 							type="button" 
 							onClick={()=>handleSelect(2)}
+							style={{pointerEvents: name === '' ? 'none' : 'all'}}
 						>
 							<span>2.</span>Positions
 						</a>
@@ -36,6 +121,7 @@ const Builder = (props) => {
 							className={`item builder-rules ${key === 3 ? 'active' : ''}`} 
 							type="button" 
 							onClick={()=>handleSelect(3)}
+							style={{pointerEvents: positions.length === 0 ? 'none' : 'all'}}
 						>
 							<span>3.</span>Rules
 						</a>
@@ -63,13 +149,23 @@ const Builder = (props) => {
 								<table className="ui tbl optimizername-table">
 									<thead>
 										<tr>
-											<th>Create Optimizer Name <span>Required</span></th>
+											<th>Create Optimizer Name 
+												{
+													name === '' && <span>Required</span>
+												}
+											</th>
 										</tr>
 									</thead>
 									<tbody>
 										<tr>
 											<td>
-												<input className="name-optimizername" type="text" value="" placeholder="Enter Name..." readOnly/>
+												<input 
+													className="name-optimizername" 
+													type="text" 
+													value={name} 
+													placeholder="Enter Name..." 
+													onChange={handleName}
+												/>
 											</td>
 										</tr>
 									</tbody>
@@ -98,22 +194,42 @@ const Builder = (props) => {
 								<table className="ui tbl positions-table">
 									<thead>
 										<tr>
-											<th>Position <span>At least 1 position required</span></th>
+											<th>Position 
+												{
+													positions.length === 0 && <span>At least 1 position required</span>
+												}
+											</th>
 											<th className="right">Delete</th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>
-												<input type="tel" value="" placeholder="Enter position/s..." readOnly/>
-											</td>
-											<td className="right"><i className="ic-delete-1" aria-hidden="true"></i></td>
-										</tr>
+										{
+											positions.map((position, index) => {
+												return (
+													<tr key={index}>
+														<td>
+															<input 
+																type="text" 
+																value={position} 
+																placeholder="Enter positions..." 
+																onChange={(e) => handlePositions(e, index)}
+															/>
+														</td>
+														<td className="right">
+															<i className="ic-delete-1" aria-hidden="true" onClick={(e) => deletePosition(e, index)}></i>
+														</td>
+													</tr>
+												)
+											})
+										}
 									</tbody>
 								</table>
 								
 								<div className="ui level add-position">
-									<button className="ui button success i-left right" type="button"><i className="im im-plus-circle" aria-hidden="true"></i> Add Position</button>
+									<button className="ui button primary i-left" type="button" onClick={pushNewPosition}>
+										<i className="im im-plus-circle" aria-hidden="true"></i> 
+										&nbsp;Add Position
+									</button>
 								</div>
 							</div>				
 						</Tab>
@@ -160,7 +276,12 @@ const Builder = (props) => {
 											</td>
 											<td className="right">
 												<label>0 if not changed</label>
-												<input className="rules-minsalary" type="tel" value="0" readOnly/>
+												<input 
+													className="rules-minsalary" 
+													type="number" 
+													value={minSalary} 
+													onChange={handleMinSalary}
+												/>
 											</td>
 										</tr>
 										
@@ -179,8 +300,15 @@ const Builder = (props) => {
 												</OverlayTrigger>
 											</td>
 											<td className="right">
-												<span>Required</span>
-												<input className="rules-maxsalary" type="tel" value="0" readOnly/>
+												{
+													maxSalary === '' && <span>Required</span>
+												}
+												<input 
+													className="rules-maxsalary" 
+													type="number" 
+													value={maxSalary} 
+													onChange={handleMaxSalary}
+												/>
 											</td>
 										</tr>
 										
@@ -200,7 +328,12 @@ const Builder = (props) => {
 											</td>
 											<td className="right">
 												<label>0 if not needed</label>
-												<input className="rules-maxplayers" type="tel" value="0" readOnly/>
+												<input 
+													className="rules-maxplayers" 
+													type="number" 
+													value={maxPlayers} 
+													onChange={handleMaxPlayers}
+												/>
 											</td>
 										</tr>
 										
@@ -220,7 +353,12 @@ const Builder = (props) => {
 											</td>
 											<td className="right">
 												<label>0 if not needed</label>
-												<input className="rules-minteams" type="tel" value="0" readOnly/>
+												<input 
+													className="rules-minteams" 
+													type="number" 
+													value={minTeams} 
+													onChange={handleMinTeams}
+												/>
 											</td>
 										</tr>
 										
@@ -240,8 +378,15 @@ const Builder = (props) => {
 											</td>
 											<td className="right">
 												<label>none if not needed</label>
-												<select className="rules-noopponent">
-												  <option value="">None</option>
+												<select className="rules-noopponent" onChange={handleNoOpponent} value={noOpponent}>
+													<option value="">None</option>
+													{
+														opponents.map((opponent) => {
+															return (
+																<option value={opponent}>{opponent}</option>
+															)
+														})
+													}
 												</select>
 											</td>
 										</tr>
@@ -265,13 +410,14 @@ const Builder = (props) => {
 						className="ui button primary builder-next" 
 						type="button" 
 						onClick={() => setKey(key+1)} 
-						disabled={key === 3}
+						disabled={key === 3 || key === 1 && name === '' || key === 2 && positions.length === 0}
 					>
 						Next
 					</button>
 					<button 
 						className={`ui button success builder-build ${key === 3 ? '' : 'hidden'}`} 
 						type="submit"
+						onClick={saveSetting}
 					>
 						Build
 					</button>

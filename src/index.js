@@ -11,7 +11,7 @@ export const App = () => {
   return (
     <Switch> {/* The Switch decides which component to show based on the current URL.*/}
       <Route exact path='/' component={Dashboard}></Route>
-      <Route exact path='/optimizer' component={Optimizer}></Route>
+      <Route exact path='/optimizer/:id' component={Optimizer}></Route>
     </Switch>
   );
 }
