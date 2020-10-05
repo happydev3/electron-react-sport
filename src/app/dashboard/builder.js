@@ -63,6 +63,7 @@ const Builder = (props) => {
 		let newArr = [...positions];
 		newArr.splice(index, 1);
 		setPositions(newArr);
+		setOpponents(newArr);
 	}
 
 	const saveSetting = () => {
