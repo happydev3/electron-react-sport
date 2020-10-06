@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Tabs, Tab, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 const { ipcRenderer } = window.require('electron');
 
@@ -59,15 +59,24 @@ const Builder = (props) => {
 
 	const handlePositions = (e, index) => {
 		let shadowPositions= [...positions];
-		let shadowOpponents = [...opponents];
-		e.target.value.split(',').map((item) => {
-			if(!shadowOpponents.includes(item) || item !== '') {
-				shadowOpponents.push(item);
-			}
-			setOpponents(shadowOpponents);
-		})
 		shadowPositions[index] = e.target.value;
 		setPositions(shadowPositions);
+	}
+
+	const handleOpponents = (positions) => {
+		let newArray = [];
+		let sortArray = [];
+		for (let i = 0; i < positions.length; i++) {
+			const _position = positions[i].split(',');
+			for(let j = 0; j < _position.length; j++) {
+				if(!newArray.includes(_position[j]) && _position[j] !== '') {
+					newArray.push(_position[j]);
+				}
+			}
+		}
+
+		sortArray = newArray;
+		setOpponents(sortArray);
 	}
 
 	const deletePosition = (e, index) => {
@@ -91,9 +100,7 @@ const Builder = (props) => {
 			}
 			ipcRenderer.send('insertOptimizes', sql);
 			ipcRenderer.on('responseInsertOptimizes', (event, arg) => {
-				if(arg === 'success') {
-					props.handleClose(false);
-				}
+				props.handleClose(false);
 			});
 		}
 	}
@@ -102,6 +109,12 @@ const Builder = (props) => {
 	const handleSelect = (value) => {
 		setKey(value);
 	}
+
+	useEffect(() => {
+		handleOpponents(positions);
+		return () => {
+		}
+	}, [positions])
 
 	return (
 		<Modal size="lg" centered show={props.show} onHide={props.handleClose}>

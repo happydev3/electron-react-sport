@@ -49,7 +49,6 @@ const Optimizer = (props) => {
 
 		getID(props.history.location.pathname);
 
-
 		return () => {
 			clearTimeout(timer);
 		}
@@ -62,6 +61,21 @@ const Optimizer = (props) => {
 			window.removeEventListener('click', onClickOutside);
 		}
 	});
+
+	const getSort = (positions) => {
+		let newArray = [];
+		let sortArray = [];
+		for (let i = 0; i < positions.length; i++) {
+			const _position = positions[i].split(',');
+			for(let j = 0; j < _position.length; j++) {
+				if(!newArray.includes(_position[j])) {
+					newArray.push(_position[j]);
+				}
+			}
+		}
+		sortArray = newArray;
+		return sortArray;
+	}
 	
 	const onClickOutside = (e) => {
 		if(playerSortDropdown && !playerSortDropdownContainer.current.contains(e.target)) {
@@ -135,7 +149,7 @@ const Optimizer = (props) => {
 												
 												<div className="item item-grouped">
 													{
-														optimize.positions && optimize.positions.split(',').map((position, index) => {
+														getSort(optimize.positions).map((position, index) => {
 															return (
 															<a key={index} className={`item ${positionSort === index ? 'active' : ''}`} type="button" onClick={() => setPositionSort(position)}>{position}</a>
 															)

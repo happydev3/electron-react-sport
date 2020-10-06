@@ -46,7 +46,6 @@ const Settings = (props) => {
 	}
 
 	const handlePositions = (e, index) => {
-		console.log('_______initialProps => ', initialProps);
 		let shadowPositions= [...positions];
 		let shadowOpponents = [...opponents];
 		e.target.value.split(',').map((item) => {
@@ -80,6 +79,7 @@ const Settings = (props) => {
 			}
 			ipcRenderer.send('updateOptimizes', sql);
 			ipcRenderer.on('responseUpdateOptimizes', (event, arg) => {
+				console.log('_____arg______', arg);
 				if(arg === 'success') {
 					props.handleClose(false);
 					props.callback();
@@ -89,32 +89,46 @@ const Settings = (props) => {
 	}
 
 	useEffect(() => {
-		console.log('props => ', props.optimize);
 		setId(props.optimize.id || "")
 		setName(props.optimize.name || "")
-		setPositions(props.optimize.positions !== undefined ? props.optimize.positions.split(',') : [])
+		setPositions(props.optimize.positions !== undefined ? props.optimize.positions : [])
 		setMinSalary(props.optimize.minSalary || "")
 		setMaxSalary(props.optimize.maxSalary || "")
 		setMaxPlayers(props.optimize.maxPlayers || "")
 		setMinTeams(props.optimize.minTeams || "")
 		setNoOpponent(props.optimize.noOpponent || "")
-		setOpponents(props.optimize.positions !== undefined ? props.optimize.positions.split(',') : [])
+		handleOpponents(props.optimize.positions || [])
 		setInitialProps(props.optimize)
 		return () => {
 		}
-	}, [props.optimize])
+	}, [props.optimize, props.optimize.positions])
+
+	const handleOpponents = (positions) => {
+		let newArray = [];
+		let sortArray = [];
+		for (let i = 0; i < positions.length; i++) {
+			const _position = positions[i].split(',');
+			for(let j = 0; j < _position.length; j++) {
+				if(!newArray.includes(_position[j])) {
+					newArray.push(_position[j]);
+				}
+			}
+		}
+		sortArray = newArray;
+		setOpponents(sortArray);
+	}
 
 
 	const compareValue = () => {
-		console.log('initialProps.positions', initialProps.positions, ...positions)
 		if(
 			initialProps.id === id &&
 			initialProps.name === name &&
 			initialProps.minSalary === minSalary &&
 			initialProps.maxSalary === maxSalary &&
 			initialProps.maxPlayers === maxPlayers &&
+			initialProps.minTeams === minTeams &&
 			initialProps.noOpponent === noOpponent &&
-			JSON.stringify(initialProps.positions) === JSON.stringify(positions.toString())
+			JSON.stringify(initialProps.positions) === JSON.stringify(positions)
 		) {
 			return true;
 		} else {
