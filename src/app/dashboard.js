@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Link, withRouter } from "react-router-dom";
+import { Modal, Button } from 'react-bootstrap';
 import Preloader from './shared/Preloader';
 import TopBar from './shared/TopBar';
 import Builder from './dashboard/builder';
+import ConfirmModal from './shared/Conform';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -11,8 +13,12 @@ const Dashboard = (props) => {
 	const [loading, setLoading] = useState(true);
 	const [builder, setBuilder] = useState(false);
 	const [optimizes, setOptimizes] = useState('');
+	const [confirm, setConfirm] = useState(false);
+
 	const handleCloseBuilder = () => setBuilder(false);
 	const handleShowBuilder = () => setBuilder(true);
+	const handleConfirm = () => setConfirm(true);
+	const handleClose = () => setConfirm(false);
 
 	const getOptimizes = () => {
 		ipcRenderer.send('getOptimizes', 'all');
@@ -59,7 +65,7 @@ const Dashboard = (props) => {
 									Build
 								</a>				
 								<div className="item item-spacer"></div>
-								<a className="item" type="button" onClick={() => deleteOptimize('all')}>
+								<a className="item" type="button" onClick={() => setConfirm(true)}>
 									<i className="icimg icimg-delete" aria-hidden="true"></i> 
 									Delete
 								</a>			
@@ -111,6 +117,7 @@ const Dashboard = (props) => {
 			}
 			
 			<Builder show={builder} handleClose={handleCloseBuilder} />	
+			<ConfirmModal show={confirm} handleClose={handleClose} deleteOptimize={(id) => deleteOptimize(id)}/>
 		</div>
 	);
 }
