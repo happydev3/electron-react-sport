@@ -22,7 +22,6 @@ const Dashboard = (props) => {
 	}
 
 	const deleteOptimize = (id) => {
-		console.log('IIIIIIDDDDDD', id);
 		ipcRenderer.send('deleteOptimize', id);
 		ipcRenderer.on('responseDeleteOptimize', (event, arg) => {
 			getOptimizes();
@@ -55,9 +54,15 @@ const Dashboard = (props) => {
 						?
 						<>					
 							<div className="bottombar ui level">
-								<a className="item" variant="primary" onClick={handleShowBuilder}><i className="icimg icimg-playerpool" aria-hidden="true"></i> Build</a>				
+								<a className="item" variant="primary" onClick={handleShowBuilder}>
+									<i className="icimg icimg-playerpool" aria-hidden="true"></i> 
+									Build
+								</a>				
 								<div className="item item-spacer"></div>
-								<a className="item" type="button"><i className="icimg icimg-delete" aria-hidden="true"></i> Delete</a>			
+								<a className="item" type="button" onClick={() => deleteOptimize('all')}>
+									<i className="icimg icimg-delete" aria-hidden="true"></i> 
+									Delete
+								</a>			
 							</div>
 							
 							<div className="window-content dash-window-content">

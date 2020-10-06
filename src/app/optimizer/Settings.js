@@ -108,7 +108,7 @@ const Settings = (props) => {
 			</Modal.Header>
 			<Modal.Body>
 				<div className="ui level padded">
-					<button type="button" className="ui button primary i-left" onClick={saveSetting} disabled={name === '' || maxSalary === ''}>
+					<button type="button" className="ui button primary i-left" onClick={saveSetting} disabled={name === '' || maxSalary === '' || maxSalary === 0 || positions.length === 0 || (positions.length === 1 && positions[0] === '')}>
 						<i className="im im-floppy-disk" aria-hidden="true"></i>
 						&nbsp; Save Settings
 					</button>                           					

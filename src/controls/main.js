@@ -73,14 +73,27 @@ ipcMain.on('updateOptimizes', (event, arg) => {
 
 
 ipcMain.on('deleteOptimize', (event, arg) => {
-    db('optimizers')
-    .where('id', arg)
-    .del()
-    .then((rows) => {
-        event.reply('responseDeleteOptimize', 'success')
-     })
-     .catch(e => {
-         console.error(e);
-         event.reply('responseDeleteOptimize', 'false')
-     });
+    if(arg === 'all') {
+        db('optimizers')
+        .whereNot('id', -1)
+        .del()
+        .then((rows) => {
+            event.reply('responseDeleteOptimize', 'success')
+        })
+        .catch(e => {
+            console.error(e);
+            event.reply('responseDeleteOptimize', 'false')
+        });
+    } else {
+        db('optimizers')
+        .where('id', arg)
+        .del()
+        .then((rows) => {
+            event.reply('responseDeleteOptimize', 'success')
+         })
+         .catch(e => {
+             console.error(e);
+             event.reply('responseDeleteOptimize', 'false')
+         });
+    }
 });

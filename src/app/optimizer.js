@@ -13,7 +13,7 @@ const Optimizer = (props) => {
 
 	const [loading, setLoading] = useState(true);
 	const [optimizerTabs, setOptimizerTabs] = useState(true);
-	const [positionSort, setPositionSort] = useState('all');
+	const [positionSort, setPositionSort] = useState(0);
 	const [playerSort, setPlayerSort] = useState('MyPool')
 	const [playerSortDropdown, setPlayerSortDropdown] = useState(false);
 	const playerSortDropdownContainer = React.useRef();
@@ -137,7 +137,7 @@ const Optimizer = (props) => {
 													{
 														optimize.positions && optimize.positions.split(',').map((position, index) => {
 															return (
-															<a key={index} className={`item ${positionSort === position ? 'active' : ''}`} type="button" onClick={() => setPositionSort(position)}>{position}</a>
+															<a key={index} className={`item ${positionSort === index ? 'active' : ''}`} type="button" onClick={() => setPositionSort(position)}>{position}</a>
 															)
 														})
 													}

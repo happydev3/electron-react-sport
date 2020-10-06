@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { Tabs, Tab, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 const { ipcRenderer } = window.require('electron');
 
-const noOpponents = ["A","B","C","D","E","F","G","H","Z"];
 
 const Builder = (props) => {
 	const [key, setKey] = useState(1);
@@ -40,13 +39,25 @@ const Builder = (props) => {
 		setNoOpponent(e.target.value);
 	}
 
+	const handle1 = (e) => {
+		setKey(e);
+	}
+
+	const handle2 = (e) => {
+		positions.map((position, index) => {
+			if (position === '') {
+				deletePosition(position, index);
+			}
+		 })
+		setKey(e);
+	}
+
 	const pushNewPosition = () => {
 		const newArray = positions.concat(['']);
 		setPositions(newArray);
 	}
 
 	const handlePositions = (e, index) => {
-		e.persist();
 		let shadowPositions= [...positions];
 		let shadowOpponents = [...opponents];
 		e.target.value.split(',').map((item) => {
@@ -409,14 +420,15 @@ const Builder = (props) => {
 					<button 
 						className="ui button primary builder-next" 
 						type="button" 
-						onClick={() => setKey(key+1)} 
-						disabled={key === 3 || key === 1 && name === '' || key === 2 && positions.length === 0}
+						onClick={() => key === 1 ? handle1(key+1) : handle2(key+1)} 
+						disabled={key === 3 || key === 1 && name === '' || key === 2 && positions.length === 0 || (positions.length === 1 && positions[0] === '')}
 					>
 						Next
 					</button>
 					<button 
 						className={`ui button success builder-build ${key === 3 ? '' : 'hidden'}`} 
 						type="submit"
+						disabled={maxSalary === '' || maxSalary === 0}
 						onClick={saveSetting}
 					>
 						Build
