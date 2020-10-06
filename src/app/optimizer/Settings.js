@@ -13,7 +13,7 @@ const Settings = (props) => {
 	const [maxPlayers, setMaxPlayers] = useState('');
 	const [minTeams, setMinTeams] = useState('');
 	const [noOpponent, setNoOpponent] = useState('');
-	const [opponents, setOpponents] = useState(props.optimize.positions);
+	const [opponents, setOpponents] = useState([]);
 	const [initialProps, setInitialProps] = useState({...props.optimize});
 
 	const handleName = (e) => {
@@ -50,6 +50,8 @@ const Settings = (props) => {
 		let shadowOpponents = [...opponents];
 		shadowPositions[index] = e.target.value;
 		setPositions(shadowPositions);
+
+		handleOpponents(shadowPositions);
 	}
 
 	const deletePosition = (e, index) => {
