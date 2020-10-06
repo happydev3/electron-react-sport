@@ -13,7 +13,7 @@ const Settings = (props) => {
 	const [maxPlayers, setMaxPlayers] = useState('');
 	const [minTeams, setMinTeams] = useState('');
 	const [noOpponent, setNoOpponent] = useState('');
-	const [opponents, setOpponents] = useState([]);
+	const [opponents, setOpponents] = useState(props.optimize.positions);
 	const [initialProps, setInitialProps] = useState({...props.optimize});
 
 	const handleName = (e) => {
@@ -48,12 +48,6 @@ const Settings = (props) => {
 	const handlePositions = (e, index) => {
 		let shadowPositions= [...positions];
 		let shadowOpponents = [...opponents];
-		e.target.value.split(',').map((item) => {
-			if(!shadowOpponents.includes(item) || item !== '') {
-				shadowOpponents.push(item);
-			}
-			setOpponents(shadowOpponents);
-		})
 		shadowPositions[index] = e.target.value;
 		setPositions(shadowPositions);
 	}
@@ -103,6 +97,7 @@ const Settings = (props) => {
 	}, [props.optimize, props.optimize.positions])
 
 	const handleOpponents = (positions) => {
+		console.log('test', positions);
 		let newArray = [];
 		let sortArray = [];
 		for (let i = 0; i < positions.length; i++) {

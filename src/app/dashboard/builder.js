@@ -145,7 +145,7 @@ const Builder = (props) => {
 							className={`item builder-rules ${key === 3 ? 'active' : ''}`} 
 							type="button" 
 							onClick={()=>handleSelect(3)}
-							style={{pointerEvents: positions.length === 0 || name === '' ? 'none' : 'all'}}
+							style={{pointerEvents: positions.length === 0 || positions.includes('') || name === '' ? 'none' : 'all'}}
 						>
 							<span>3.</span>Rules
 						</a>
