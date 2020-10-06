@@ -79,7 +79,6 @@ const Settings = (props) => {
 			}
 			ipcRenderer.send('updateOptimizes', sql);
 			ipcRenderer.on('responseUpdateOptimizes', (event, arg) => {
-				console.log('_____arg______', arg);
 				if(arg === 'success') {
 					props.handleClose(false);
 					props.callback();
