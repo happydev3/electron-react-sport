@@ -14,6 +14,7 @@ const Settings = (props) => {
 	const [minTeams, setMinTeams] = useState('');
 	const [noOpponent, setNoOpponent] = useState('');
 	const [opponents, setOpponents] = useState([]);
+	const [initialProps, setInitialProps] = useState({...props.optimize});
 
 	const handleName = (e) => {
 		setName(e.target.value);
@@ -45,11 +46,11 @@ const Settings = (props) => {
 	}
 
 	const handlePositions = (e, index) => {
-		e.persist();
+		console.log('_______initialProps => ', initialProps);
 		let shadowPositions= [...positions];
 		let shadowOpponents = [...opponents];
 		e.target.value.split(',').map((item) => {
-			if(!shadowOpponents.includes(item) && item !== '') {
+			if(!shadowOpponents.includes(item) || item !== '') {
 				shadowOpponents.push(item);
 			}
 			setOpponents(shadowOpponents);
@@ -88,6 +89,7 @@ const Settings = (props) => {
 	}
 
 	useEffect(() => {
+		console.log('props => ', props.optimize);
 		setId(props.optimize.id || "")
 		setName(props.optimize.name || "")
 		setPositions(props.optimize.positions !== undefined ? props.optimize.positions.split(',') : [])
@@ -97,9 +99,28 @@ const Settings = (props) => {
 		setMinTeams(props.optimize.minTeams || "")
 		setNoOpponent(props.optimize.noOpponent || "")
 		setOpponents(props.optimize.positions !== undefined ? props.optimize.positions.split(',') : [])
+		setInitialProps(props.optimize)
 		return () => {
 		}
 	}, [props.optimize])
+
+
+	const compareValue = () => {
+		console.log('initialProps.positions', initialProps.positions, ...positions)
+		if(
+			initialProps.id === id &&
+			initialProps.name === name &&
+			initialProps.minSalary === minSalary &&
+			initialProps.maxSalary === maxSalary &&
+			initialProps.maxPlayers === maxPlayers &&
+			initialProps.noOpponent === noOpponent &&
+			JSON.stringify(initialProps.positions) === JSON.stringify(positions.toString())
+		) {
+			return true;
+		} else {
+			return false
+		}
+	}
 	
 	return (
 		<Modal size="lg" centered show={props.show} onHide={props.handleClose}>
@@ -108,7 +129,19 @@ const Settings = (props) => {
 			</Modal.Header>
 			<Modal.Body>
 				<div className="ui level padded">
-					<button type="button" className="ui button primary i-left" onClick={saveSetting} disabled={name === '' || maxSalary === '' || maxSalary === 0 || positions.length === 0 || (positions.length === 1 && positions[0] === '')}>
+					<button 
+					type="button" 
+					className="ui button primary i-left" 
+					onClick={saveSetting} 
+					disabled={
+						name === '' || 
+						maxSalary === '' || 
+						maxSalary === 0 || 
+						positions.length === 0 || 
+						positions.includes('') || 
+						compareValue() === true
+					}
+					>
 						<i className="im im-floppy-disk" aria-hidden="true"></i>
 						&nbsp; Save Settings
 					</button>                           					

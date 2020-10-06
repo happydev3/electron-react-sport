@@ -61,7 +61,7 @@ const Builder = (props) => {
 		let shadowPositions= [...positions];
 		let shadowOpponents = [...opponents];
 		e.target.value.split(',').map((item) => {
-			if(!shadowOpponents.includes(item) && item !== '') {
+			if(!shadowOpponents.includes(item) || item !== '') {
 				shadowOpponents.push(item);
 			}
 			setOpponents(shadowOpponents);
@@ -421,7 +421,12 @@ const Builder = (props) => {
 						className="ui button primary builder-next" 
 						type="button" 
 						onClick={() => key === 1 ? handle1(key+1) : handle2(key+1)} 
-						disabled={key === 3 || key === 1 && name === '' || key === 2 && positions.length === 0 || (positions.length === 1 && positions[0] === '')}
+						disabled={
+							key === 3 || 
+							key === 1 && name === '' || 
+							key === 2 && positions.length === 0 || 
+							positions.includes('')
+						}
 					>
 						Next
 					</button>

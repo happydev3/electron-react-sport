@@ -29,6 +29,8 @@ ipcMain.on('getOptimizes', (event, arg) => {
 });
 
 ipcMain.on('insertOptimizes', (event, arg) => {
+
+    console.error('insert values => ', arg);
     
     db('optimizers')
     .insert({
@@ -50,6 +52,8 @@ ipcMain.on('insertOptimizes', (event, arg) => {
 })
 
 ipcMain.on('updateOptimizes', (event, arg) => {
+
+    console.error('update values => ', arg);
 
     db('optimizers')
     .where('id', arg.id)
