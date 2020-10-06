@@ -151,7 +151,7 @@ const Optimizer = (props) => {
 													{
 														getSort(optimize.positions).map((position, index) => {
 															return (
-															<a key={index} className={`item ${positionSort === index ? 'active' : ''}`} type="button" onClick={() => setPositionSort(position)}>{position}</a>
+															<a key={index} className={`item ${positionSort === index ? 'active' : ''}`} type="button" onClick={() => setPositionSort(index)}>{position}</a>
 															)
 														})
 													}
