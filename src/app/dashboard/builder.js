@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
 import { Tabs, Tab, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 const { ipcRenderer } = window.require('electron');
-
 
 const Builder = (props) => {
 	const [key, setKey] = useState(1);

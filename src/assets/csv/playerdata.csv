@@ -1,0 +1,9 @@
+Id,Name,Position,Team,Opponent,Salary,FPTS,Exposure,,Instructions
+,,,,,,,,,1. Id column is used to export and upload lineups to site. Each site and contest time's have different id's
+,,,,,,,,,2. Name column is player names
+,,,,,,,,,3. Position column is player positions
+,,,,,,,,,4. Team column is player's team
+,,,,,,,,,5. Opponent column is player's opponent
+,,,,,,,,,6. Salary column is player's salary
+,,,,,,,,,7. FPTS column is player's projected fantasy points
+,,,,,,,,,8. Exposure column is the percentage from 0 to 100 with 100 the highest that a single player will be added to lineups

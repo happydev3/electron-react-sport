@@ -1,6 +1,5 @@
-import React from "react"
+import React from "react";
 import { Modal } from 'react-bootstrap';
-
 
 const Projections = (props) => {
 	return (
@@ -9,16 +8,11 @@ const Projections = (props) => {
 				<Modal.Title>Projections</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-				<div className="projections-container">
-				
-				</div>
-				
-				<div className="ui level padded">
-				
+				<div className="projections-container">			
 				</div>
 			</Modal.Body>
 		</Modal>
-	)
+	);
 }
 
 export default Projections;

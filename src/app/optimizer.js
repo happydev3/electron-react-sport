@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Preloader from './shared/Preloader';
 import TopBar from './shared/TopBar';
 import Settings from './optimizer/Settings';
 import PlayerData from './optimizer/PlayerData';
 import Projections from './optimizer/Projections';
+import PlayerGrid from './optimizer/PlayerGrid';
+
+// import { getOptimize } from '../actions/index';
 
 const { ipcRenderer } = window.require('electron');
+
 
 const Optimizer = (props) => {
 
@@ -21,7 +26,9 @@ const Optimizer = (props) => {
 	const [settings, setSettings] = useState(false);
 	const [playerdata, setPlayerData] = useState(false);
 	const [projections, setProjections] = useState(false);
-	const [optimize, setOptimize] = useState('');
+	const [optimize, setOptimize] = useState({});
+	const [optimizeId, setOptimizeID] = useState('');
+	const [players, setPlayers] = useState([]);
 	const [positions, setPositions] = useState();
 	const handleCloseSettings = () => setSettings(false);
 	const handleShowSettings = () => setSettings(true);	
@@ -34,20 +41,24 @@ const Optimizer = (props) => {
 		ipcRenderer.send('getOptimizes', id);
 		ipcRenderer.on('responseGetOptimizes', (event, arg) => {
 			setOptimize(arg[0]);
+			setOptimizeID(arg[0].id);
+			setPlayers(arg[0].players);
 		});
 	}
 
-	const getID = (pathname) => {
-		getOptimize(pathname.split('/').slice(-1)[0]);
+	const getID = () => {
+		getOptimize(props.history.location.pathname.split('/').slice(-1)[0]);
 	}
 	
 	useEffect(() => {
+
+		console.log('optimize', optimize);
 
 		const timer = setTimeout(() => {
 			setLoading(false);
 		}, 400);
 
-		getID(props.history.location.pathname);
+		getID();
 
 		return () => {
 			clearTimeout(timer);
@@ -65,23 +76,26 @@ const Optimizer = (props) => {
 	const getSort = (positions) => {
 		let newArray = [];
 		let sortArray = [];
-		for (let i = 0; i < positions.length; i++) {
-			const _position = positions[i].split(',');
-			for(let j = 0; j < _position.length; j++) {
-				if(!newArray.includes(_position[j])) {
-					newArray.push(_position[j]);
+		if(positions && positions.length > 0) {
+			for (let i = 0; i < positions.length; i++) {
+				const _position = positions[i].split(',');
+				for(let j = 0; j < _position.length; j++) {
+					if(!newArray.includes(_position[j])) {
+						newArray.push(_position[j]);
+					}
 				}
 			}
+			sortArray = newArray;
+			return sortArray;
 		}
-		sortArray = newArray;
-		return sortArray;
 	}
 	
 	const onClickOutside = (e) => {
 		if(playerSortDropdown && !playerSortDropdownContainer.current.contains(e.target)) {
 			setPlayerSortDropdown(false);
 		}
-	}		
+	}
+
     const callback = () => {
 		getID(props.history.location.pathname);
 	}
@@ -144,12 +158,13 @@ const Optimizer = (props) => {
 													<div className="search ui input">
 														<input type="text" placeholder="Search players..." readOnly/>
 														<i className="search-icon im im-magnifier"></i>
+														<button className="clear-search hidden" type="reset"><i className="im im-x-mark-circle-o" aria-hidden="true"></i></button>
 													</div>
 												</div>	
 												
 												<div className="item item-grouped">
 													{
-														getSort(optimize.positions).map((position, index) => {
+														optimize.positions && getSort(optimize.positions).map((position, index) => {
 															return (
 															<a key={index} className={`item ${positionSort === index ? 'active' : ''}`} type="button" onClick={() => setPositionSort(index)}>{position}</a>
 															)
@@ -208,16 +223,30 @@ const Optimizer = (props) => {
 											</div>	
 
 											<div className="playerpool-grid">
-
-												<div className="playerpool-nodata-overlay active">
-													<div className="content">
-														<button className="ui success button" type="button" onClick={handleShowPlayerData}><i className="im im-cloud-upload" aria-hidden="true"></i> Player Data</button>
+												{
+													players !== 0
+													?
+													<PlayerGrid players={players} getID={getID} />
+													:
+													<div className="playerpool-nodata-overlay active">
+														<div className="content">
+															<button className="ui success button" type="button" onClick={handleShowPlayerData}>
+																<i className="im im-cloud-upload" aria-hidden="true"></i> Player Data
+															</button>
+														</div>
 													</div>
-												</div>
+												}
 											</div>
 											
 											<div className="playerpool-calc ui level margin">
-														
+												<div className="item">
+												</div>
+												
+												<div className="right">
+													<div className="item">
+														<button className="ui button primary transparent" type="button">Add Player</button>
+													</div>	
+												</div>															
 											</div>							
 										</div>
 									</div>
@@ -225,14 +254,12 @@ const Optimizer = (props) => {
 								:
 								<section className="lin-content content">
 									<div className="lineups-pane-group">						
-										<div className="lineups-pane-sm">
-										
+										<div className="lineups-pane-sm">										
 										</div>
 										
 										<div className="lineups-pane">
-
 										</div>
-									</div>					
+									</div>								
 								</section>
 							}
 						</div>
@@ -241,10 +268,21 @@ const Optimizer = (props) => {
 			}
 			
 			<Settings show={settings} handleClose={handleCloseSettings} optimize={optimize} callback={callback}/>
-			<PlayerData show={playerdata} handleClose={handleClosePlayerData} />
-			<Projections show={projections} handleClose={handleCloseProjections} />		
+			<PlayerData show={playerdata} handleClose={handleClosePlayerData} players={players} optimizeId={optimizeId} getID={getID}/>
+			<Projections show={projections} handleClose={handleCloseProjections}/>		
 		</div>
 	);
 }
 
-export default withRouter(Optimizer);
+// const mapStateToProps = ({ common }) => {
+// 	const { optimize } = common;
+//     return { optimize };
+// };
+
+// const mapDispatchToProps = dispatch => ({
+// 	getOptimize
+// });
+
+
+// export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Optimizer));
+export default Optimizer;

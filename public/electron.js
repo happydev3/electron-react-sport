@@ -14,14 +14,15 @@ let mainWindow;
 async function createWindow() {
     mainWindow = new BrowserWindow({
 		width: 992, 
-		height: 630,
+		height: 620,
+		show: false,
 		frame: false,
 		darkTheme: true,
 		backgroundColor: "#03213a",
 		resizable: false,
 		webPreferences: {
-			nodeIntegration: true,
-			enableRemoteModule: true
+            nodeIntegration: true,
+            enableRemoteModule: true
 		}
     });
     mainWindow.on("ready-to-show", async () => {

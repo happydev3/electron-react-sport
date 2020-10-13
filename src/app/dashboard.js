@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link, withRouter } from "react-router-dom";
 import { Modal, Button } from 'react-bootstrap';
+import { connect } from 'react-redux';
 import Preloader from './shared/Preloader';
 import TopBar from './shared/TopBar';
-import Builder from './dashboard/builder';
-import ConfirmModal from './shared/Conform';
+import Builder from './dashboard/Builder';
+import ConfirmModal from './shared/Confirm';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -122,4 +123,4 @@ const Dashboard = (props) => {
 	);
 }
 
-export default withRouter(Dashboard);
+export default connect(()=>({}))(withRouter(Dashboard));

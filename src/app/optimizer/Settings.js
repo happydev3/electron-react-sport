@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react"
+import React, { useState, useEffect} from "react";
 import { Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 
 const { ipcRenderer } = window.require('electron');
@@ -99,7 +99,6 @@ const Settings = (props) => {
 	}, [props.optimize, props.optimize.positions])
 
 	const handleOpponents = (positions) => {
-		console.log('test', positions);
 		let newArray = [];
 		let sortArray = [];
 		for (let i = 0; i < positions.length; i++) {

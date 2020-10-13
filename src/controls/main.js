@@ -16,12 +16,16 @@ const db = require('knex')({
 
 ipcMain.on('getOptimizes', (event, arg) => {
 
+    console.log('_______event_______', event);
+    console.log('_______arg_________', arg);
+
     let result;
 
     if( arg === 'all') {
         result = db.select().from('optimizers');
         result.then((rows) => {
             getFullResult(rows).then((res) => {
+                console.log('full result', res);
                 event.reply('responseGetOptimizes', res);
             });
         });
@@ -30,6 +34,7 @@ ipcMain.on('getOptimizes', (event, arg) => {
         result = db.select().from('optimizers').where('id', arg);
         result.then((rows) => {
             getFullResult(rows).then((res) => {
+                console.log('result by id', res);
                 event.reply('responseGetOptimizes', res);
             });
         });
@@ -129,11 +134,55 @@ ipcMain.on('deleteOptimize', async (event, arg) => {
 });
 
 
+ipcMain.handle('submitCSV', async (event, arg) => {
+    console.log('sunmit csv', event, arg);
+    let _newArray = [];
+    let insertCSV = [];
+    for(let i = 0; i < arg.uploadData.length; i++) {
+        _newArray.push({
+            name: arg.uploadData[i].name,
+            position: arg.uploadData[i].pos,
+            team: arg.uploadData[i].team,
+            opponent: arg.uploadData[i].opp,
+            salary: arg.uploadData[i].salary,
+            fpts: arg.uploadData[i].fpts,
+            exposure: arg.uploadData[i].exp,
+            optimize_id: arg.optimizeId
+        })
+    }
+    insertCSV = _newArray;
+    console.log('insertCSV', insertCSV);
+    let result = await db('players')
+                        .insert(insertCSV);
+
+    return result;
+});
+
+ipcMain.handle('deleteRow', async (event, arg) => {
+    console.log('deleteRow', arg);
+    let result = await db('players')
+                        .where('id', arg)
+                        .del();
+    return result;
+});
+
+ipcMain.handle('deleteCurrentData', async (event, arg) => {
+    console.log('deleteCurrentData', arg);
+    let result = await db('players')
+                        .where('optimize_id', arg)
+                        .del();
+    return result;
+});
+
 getFullResult = async (result) => {
     let shadowArray = [];
 
     for(let i = 0; i< result.length ; i++) {
+        let players = [];
         let _positions = await db.select().where('optimize_id', result[i].id).from('positionsOfOptimize');
+        if(result.length === 1) {
+            players = await db.select().where('optimize_id', result[i].id).from('players');
+        }
         let positions = [];
         let _newArray = [];
         for (let j = 0; j < _positions.length; j++) {
@@ -142,7 +191,8 @@ getFullResult = async (result) => {
         positions = _newArray;
         shadowArray.push({
             ...result[i],
-            positions
+            positions,
+            players
         })
     }
 
