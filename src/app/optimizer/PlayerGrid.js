@@ -11,12 +11,22 @@ function onFirstDataRendered(params) {
 
 const PlayerGrid = (props) => {	
 
+	// const [gridApi, setGridApi] = useState(null);
+  	// const [gridColumnApi, setGridColumnApi] = useState(null);
 	const [rowData, setRowData] = useState([]);
+
+	// const onGridReady = (params) => {
+	// 	setGridApi(params.api);
+	// 	setGridColumnApi(params.columnApi);
+	// 	if(props.players.length === 0) {
+	// 		gridApi.showLoadingOverlay();
+	// 	}
+	// 	handleRowData(props.players);
+	// };
 
 	useEffect(() => {
 		handleRowData(props.players);
 		return () => {
-			
 		}
 	}, [props.players]);
 
@@ -32,7 +42,7 @@ const PlayerGrid = (props) => {
 				salary: players[i].salary, 
 				fpts: players[i].fpts, 
 				exposure: players[i].exposure, 
-				id: players[i].id, 
+				id: players[i].playerid, 
 				lock: players[i].id, 
 				delete: players[i].id
 			})
@@ -60,7 +70,7 @@ const PlayerGrid = (props) => {
 			suppressSizeToFit: true,
 			headerClass: 'pp-player',
 			cellClass: 'pp-player',
-			cellRenderer: function(params) { return '<i class="im im-user-male"></i>' + params.value + '' }
+			cellRenderer: function(params) { return '<i class="im im-user-male"></i>' + params.value ? params.value : '' + '' }
 		},	
 		{
 			headerName: "Pos", 
@@ -90,7 +100,7 @@ const PlayerGrid = (props) => {
 			minWidth: 100,
 			headerClass: 'pp-salary',
 			cellClass: 'pp-salary',
-			cellRenderer: function(params) { return '<i class="im im-coin"></i>' + params.value + '' }
+			cellRenderer: function(params) { return `<i class="im im-coin"></i>${params.value ? params.value : ''}` }
 		},	
 		{
 			headerName: "FPTS", 
@@ -105,7 +115,7 @@ const PlayerGrid = (props) => {
 			minWidth: 80,
 			headerClass: 'pp-exposure',
 			cellClass: 'pp-exposure',
-			cellRenderer: function(params) { return '' + params.value + '%' }
+			cellRenderer: function(params) { return `${params.value ? params.value : ''}%` }
 		},	
 		{
 			headerName: "Id", 
@@ -153,6 +163,12 @@ const PlayerGrid = (props) => {
 					sortable: true,
 					editable: true
 				}}
+				overlayLoadingTemplate={
+					'<span className="ag-overlay-loading-center">Please wait while your rows are loading</span>'
+				}
+				overlayNoRowsTemplate={
+					'<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">This is a custom \'no rows\' overlay</span>'
+				}
 				columnDefs={columnDefs}
 				rowData={rowData}
 				headerHeight={30}

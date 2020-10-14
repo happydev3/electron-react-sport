@@ -95,9 +95,9 @@ ipcMain.on('updateOptimizes', async (event, arg) => {
                             .insert(insertPositions);
 
     if(result && updatePosition) {
-        event.reply('responseUpdateOptimizes', 'success')
+        event.reply('responseUpdateOptimizes', 'success');
     } else {
-        event.reply('responseUpdateOptimizes', 'false')
+        event.reply('responseUpdateOptimizes', 'false');
     }
 });
 
@@ -108,33 +108,42 @@ ipcMain.on('deleteOptimize', async (event, arg) => {
                             .whereNot('id', -1)
                             .del();
         let positions = await db('positionsOfOptimize')
-                            .whereNot('id', -1)
-                            .del();
+                                .whereNot('id', -1)
+                                .del();
 
-        if(result && positions) {
-           await event.reply('responseDeleteOptimize', 'success')
+        let players = await db('players')
+                                .whereNot('id', -1)
+                                .del();
+
+        if(result && positions && players) {
+           await event.reply('responseDeleteOptimize', 'success');
         } else {
-           await event.reply('responseDeleteOptimize', 'false')
+           await event.reply('responseDeleteOptimize', 'false');
         }
        
     } else {
        let result = await db('optimizers')
                             .where('id', arg)
-                            .del()
+                            .del();
        let positions = await db('positionsOfOptimize')
                             .where('optimize_id', arg)
-                            .del()
-
-       if(result && positions) {
-            event.reply('responseDeleteOptimize', 'success')
+                            .del();
+       let players = await db('players')
+                            .where('optimize_id', arg)
+                            .del();
+       if(result && positions && players) {
+            event.reply('responseDeleteOptimize', 'success');
        } else {
-            event.reply('responseDeleteOptimize', 'false')
+            event.reply('responseDeleteOptimize', 'false');
        }
     }
 });
 
 
 ipcMain.handle('submitCSV', async (event, arg) => {
+    await db('players')
+    .where('optimize_id', arg.optimizeId)
+    .del();
     console.log('sunmit csv', event, arg);
     let _newArray = [];
     let insertCSV = [];
@@ -147,13 +156,16 @@ ipcMain.handle('submitCSV', async (event, arg) => {
             salary: arg.uploadData[i].salary,
             fpts: arg.uploadData[i].fpts,
             exposure: arg.uploadData[i].exp,
+            playerid: arg.uploadData[i].playerid,
             optimize_id: arg.optimizeId
         })
     }
     insertCSV = _newArray;
     console.log('insertCSV', insertCSV);
-    let result = await db('players')
-                        .insert(insertCSV);
+
+    let result = await multipleInsert(insertCSV);
+    
+    console.log('result ===>' , result);
 
     return result;
 });
@@ -179,9 +191,13 @@ getFullResult = async (result) => {
 
     for(let i = 0; i< result.length ; i++) {
         let players = [];
-        let _positions = await db.select().where('optimize_id', result[i].id).from('positionsOfOptimize');
+        let _positions = await db.select()
+                                    .where('optimize_id', result[i].id)
+                                    .from('positionsOfOptimize');
         if(result.length === 1) {
-            players = await db.select().where('optimize_id', result[i].id).from('players');
+            players = await db.select()
+                                .where('optimize_id', result[i].id)
+                                .from('players');
         }
         let positions = [];
         let _newArray = [];
@@ -200,5 +216,25 @@ getFullResult = async (result) => {
 
     return new Promise ((resolve, reject) => {
          resolve(newArray);
+    }); 
+}
+
+
+multipleInsert = async (rows) => {
+
+    let result = true;
+
+    for (let j = 0; j < rows.length; j++) {
+        let insertResult = await db('players')
+                            .insert(rows[j]);
+        console.log('insertResult => ', insertResult);
+        if (!insertResult) {
+            result = false;
+            break;
+        }
+    }
+
+    return new Promise ((resolve, reject) => {
+        resolve(result);
     }); 
 }

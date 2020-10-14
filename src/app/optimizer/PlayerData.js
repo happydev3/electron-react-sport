@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Modal } from 'react-bootstrap';
+import { Modal, Spinner } from 'react-bootstrap';
 import { CSVLink, CSVDownload } from "react-csv";
 import CSVReader from 'react-csv-reader';
 
 const { ipcRenderer } = window.require('electron');
 
 const csvData = [
-	["Name","Pos","Team","Opp","Salary","FPTS","Exp"]
+	["Name","Pos","Team","Opp","Salary","FPTS","Exp","PlayerID"]
 ];
 
 const papaparseOptions = {
@@ -22,6 +22,7 @@ const papaparseOptions = {
 const PlayerData = (props) => {
 
 	const [uploadData, setUploadDate] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	function csvUpload(data, fileInfo) {
 		console.log('data', data);
@@ -37,6 +38,9 @@ const PlayerData = (props) => {
 	}
 
 	function submitData(e, uploadData) {
+
+		setLoading(true);
+		
 		console.log('upload data', uploadData, props.optimizeId);
 		let submitValue = {
 			uploadData: uploadData,
@@ -44,13 +48,15 @@ const PlayerData = (props) => {
 		}
 		ipcRenderer.invoke('submitCSV', submitValue).then((result) => {
 			if(result) {
+				console.log('result', result);
+				setLoading(false);
 				props.getID();
 				props.handleClose();
 			}
-			console.log('result', result);
 		});
 	}
 
+	
 	function deleteCurrentData() {
 		ipcRenderer.invoke('deleteCurrentData', props.optimizeId).then((result) => {
 			if(result) {
@@ -70,8 +76,8 @@ const PlayerData = (props) => {
 	}, [props.show])
 
 	return (
-		<Modal centered show={props.show} onHide={props.handleClose}>
-			<Modal.Header closeButton>
+		<Modal centered show={props.show} onHide={props.handleClose} backdrop="static" keyboard={false}>
+			<Modal.Header closeButton={!loading}>
 				<Modal.Title>Player Data</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
@@ -99,11 +105,19 @@ const PlayerData = (props) => {
 							<button 
 								className="ui button primary" 
 								type="button" 
-								disabled={uploadData.length === 0} 
+								disabled={uploadData.length === 0 || loading} 
 								onClick={(e) => submitData(e, uploadData)}
 							>
-								 <i className="im im-plus-circle" aria-hidden="true"></i>
-								  &nbsp;Submit Data
+								 {
+									 loading
+									 ?
+									 'Uploading...'
+									 :
+									 <>
+										<i className="im im-plus-circle" aria-hidden="true"></i>
+								  		&nbsp;Submit Data
+									 </>
+								 }
 							</button>
 							<button 
 								className="ui button danger transparent" 

@@ -224,7 +224,7 @@ const Optimizer = (props) => {
 
 											<div className="playerpool-grid">
 												{
-													players !== 0
+													players.length !== 0
 													?
 													<PlayerGrid players={players} getID={getID} />
 													:
@@ -238,15 +238,8 @@ const Optimizer = (props) => {
 												}
 											</div>
 											
-											<div className="playerpool-calc ui level margin">
-												<div className="item">
-												</div>
-												
-												<div className="right">
-													<div className="item">
-														<button className="ui button primary transparent" type="button">Add Player</button>
-													</div>	
-												</div>															
+											<div className="playerpool-calc ui level margin" style={{marginLeft: '500px', marginTop: '-40px', width: '15%'}}>
+												<button className="ui button primary transparent" type="button">Add Player</button>
 											</div>							
 										</div>
 									</div>
